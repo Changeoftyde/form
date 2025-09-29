@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quick Question</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#7dd3fc;
+      --muted:#94a3b8;
+      --white:#e6eef8;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,var(--bg),#071022);
+      color:var(--white);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      box-sizing:border-box;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      padding:28px;
+      border-radius:12px;
+      width:100%;
+      max-width:540px;
+      text-align:center;
+    }
+    h1{
+      margin:0 0 18px 0;
+      font-size:20px;
+      letter-spacing:-0.2px;
+    }
+    p.lead{
+      margin:0 0 22px 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .btns{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    button{
+      -webkit-appearance:none;
+      appearance:none;
+      border:0;
+      padding:12px 20px;
+      font-size:15px;
+      border-radius:10px;
+      cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+      min-width:110px;
+    }
+    button:active{ transform:translateY(1px) scale(.997); }
+    .btn-yes{
+      background: linear-gradient(90deg, rgba(125,211,252,0.14), rgba(34,197,94,0.06));
+      color:var(--accent);
+      box-shadow: 0 6px 18px rgba(125,211,252,0.06), inset 0 -2px 0 rgba(255,255,255,0.02);
+    }
+    .btn-no{
+      background: rgba(255,255,255,0.03);
+      color:var(--white);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .fineprint{
+      margin-top:14px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* final message */
+    .final {
+      opacity:0;
+      transform:translateY(6px);
+      transition:opacity .28s ease, transform .28s ease;
+    }
+    .final.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* accessible focus */
+    button:focus{ outline:3px solid rgba(125,211,252,0.14); outline-offset:3px; }
+
+    @media (max-width:420px){
+      h1{ font-size:18px; }
+      button{ min-width:48%; padding:12px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <h1 id="question">Can you go to Farina?</h1>
+      <p class="lead" id="lead">Choose one — the answer doesn't change the result.</p>
+
+      <div class="btns" id="buttons">
+        <button class="btn-yes" id="yesBtn" aria-label="Yes">Yes</button>
+        <button class="btn-no" id="noBtn" aria-label="No">No</button>
+      </div>
+
+      <p class="fineprint" id="fine">This is a tiny interactive prank — nothing to see afterward.</p>
+
+      <!-- final message placeholder -->
+      <div id="final" class="final" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const yes = document.getElementById('yesBtn');
+      const no = document.getElementById('noBtn');
+      const card = document.getElementById('card');
+      const final = document.getElementById('final');
+
+      function finish(){
+        // remove all interactive elements cleanly and show final message
+        // Use a tiny fade-out for existing nodes for a pleasant effect
+        document.getElementById('question').remove();
+        document.getElementById('lead').remove();
+        document.getElementById('buttons').remove();
+        document.getElementById('fine').remove();
+
+        // set final text
+        final.innerText = 'Sorry for wasting 67 seconds of your time. This leads nowhere :)';
+        // expose final message and focus for screen readers
+        final.classList.add('show');
+        final.setAttribute('tabindex','-1');
+        final.focus({preventScroll:true});
+      }
+
+      // prevent double activation
+      let done = false;
+      function handler(e){
+        if(done) return;
+        done = true;
+        // small delay to allow button press visual feedback
+        setTimeout(finish, 120);
+      }
+
+      yes.addEventListener('click', handler);
+      no.addEventListener('click', handler);
+
+      // allow keyboard activation via Enter/Space on focused buttons
+      [yes,no].forEach(btn=>{
+        btn.addEventListener('keydown', (ev)=>{
+          if(done) return;
+          if(ev.key === 'Enter' || ev.key === ' '){
+            ev.preventDefault();
+            handler();
+          }
+        });
+      });
+
+      // also handle touch devices gracefully
+      // nothing extra needed; click covers it.
+    })();
+  </script>
+</body>
+</html>
